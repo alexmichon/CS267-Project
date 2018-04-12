@@ -45,7 +45,7 @@ def BCD(A, b, M, N, l, mu, eps, max_iters=1000):
 		dotAh = Ah.map(lambda row: np.outer(row, row))
 		rh = Ah.zip(z).map(lambda t: t[0]*t[1])
 
-		aux = dotAh.zip(rh).map(lambda t: np.concatenate((t[0],np.reshape(t[1], (mu.size, 1))), axis=1)).sum()
+		aux = dotAh.zip(rh).map(lambda t: np.concatenate((t[0],np.reshape(t[1], (mu, 1))), axis=1)).sum()
 
 		dotAh = l*np.eye(mu) + aux[:, 0:mu]
 		rh = -aux[:,-1]
@@ -152,7 +152,7 @@ def CABCD(A, b, M, N, l, mu, S, eps, max_iters=1000):
 
 
 		d_alpha = Y.map(lambda Y_row: np.dot(Y_row, delta_x))
-		alpha = alpha.zip(Y_alpha).map(lambda t: t[0]+t[1])
+		alpha = alpha.zip(d_alpha).map(lambda t: t[0]+t[1])
 
 		# Residue
 
@@ -207,6 +207,8 @@ if __name__ == "__main__":
 
 	sc = spark.sparkContext
 
+	sc.setLogLevel("ERROR")
+
 	M = 10
 	N = 4
 
@@ -214,8 +216,8 @@ if __name__ == "__main__":
 	A_p = RandomRDDs.uniformVectorRDD(sc, M, N)
 	b_p = RandomRDDs.uniformRDD(sc, M)
 
-	A = A_p.collect()
-	b = b_p.collect()
+	A = np.array(A_p.collect())
+	b = np.array(b_p.collect())
 
 
 	mu = 1
@@ -225,29 +227,29 @@ if __name__ == "__main__":
 
 	eps = 0.1
 
-	# x_direct = direct(A, b, M, N, l)
-	# print("Direct")
-	# print(x_direct)
-	# print("Resnorm: ", res_norm(A, b, x_direct, l))
-	# print("\n")
+	x_direct = direct(A, b, M, N, l)
+	print("Direct")
+	print(x_direct)
+	print("Resnorm: ", res_norm(A, b, x_direct, l))
+	print("\n")
 
-	# x_BCD, metrics_BCD = BCD(A_p, b_p, M, N, l, mu, eps)
-	# print("BCD")
-	# print(x_BCD)
-	# print("Resnorm: ", res_norm(A, b, x_BCD, l))
-	# print("Execution Time: ", metrics_BCD['execution'])
-	# print("Residual Time: ", metrics_BCD['residual'])
-	# print("Iterations: ", metrics_BCD['iterations'])
-	# print("\n")
+	x_BCD, metrics_BCD = BCD(A_p, b_p, M, N, l, mu, eps)
+	print("BCD")
+	print(x_BCD)
+	print("Resnorm: ", res_norm(A, b, x_BCD, l))
+	print("Execution Time: ", metrics_BCD['execution'])
+	print("Residual Time: ", metrics_BCD['residual'])
+	print("Iterations: ", metrics_BCD['iterations'])
+	print("\n")
 
-	# x_CABCD, metrics_CABCD = CABCD(A_p, b_p, M, N, l, mu, S, eps)
-	# print("CABCD")
-	# print(x_CABCD)
-	# print("Resnorm: ", res_norm(A, b, x_CABCD, l))
-	# print("Execution Time: ", metrics_CABCD['execution'])
-	# print("Residual Time: ", metrics_CABCD['residual'])
-	# print("Iterations: ", metrics_CABCD['iterations'])
-	# print("\n")
+	x_CABCD, metrics_CABCD = CABCD(A_p, b_p, M, N, l, mu, S, eps)
+	print("CABCD")
+	print(x_CABCD)
+	print("Resnorm: ", res_norm(A, b, x_CABCD, l))
+	print("Execution Time: ", metrics_CABCD['execution'])
+	print("Residual Time: ", metrics_CABCD['residual'])
+	print("Iterations: ", metrics_CABCD['iterations'])
+	print("\n")
 
 
 

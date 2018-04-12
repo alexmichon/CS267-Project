@@ -94,6 +94,93 @@ def BDCD(sc, A, b, M, N, l, mu, eps, max_iters=50):
 
 
 
+def CABDCD(sc, A, b, M, N, l, mu, S, eps, max_iters=1000):
+	count = 0
+
+	A.cache()
+	
+
+	x = sc.parallelize(np.zeros(N))
+	alpha = np.zeros(M)
+
+	metrics = {
+		'iterations': 0,
+		'execution': 0,
+		'residual': 0
+	}
+
+	execution_start = time.time()
+
+	while count < max_iters:
+
+		idx = np.zeros(S*mu)
+		for j in range(S):
+			# Select indices
+			coords = np.arange(M)
+			np.random.shuffle(coords)
+			idx[mu*j:mu*(j+1)] = coords[:mu]
+
+		idx = idx.astype(int)
+
+
+		YT = A.map(lambda col: col[idx])
+
+		aux = YT.zip(x).map(lambda t: np.concatenate((np.outer(t[0], t[0]), np.reshape(t[0]*t[1], (S*mu, 1))), axis=1)).sum()
+
+		# G = (1/l) * YT.map(lambda col: np.outer(col, col)).sum() + np.eye(S*mu)
+		G = (1/l)*aux[:, :S*mu] + np.eye(S*mu)
+		Y_x = aux[:, -1]
+
+
+		delta_a = np.zeros(S*mu)
+		for j in range(S):
+			Mj = G[mu*j:mu*(j+1), mu*j:mu*(j+1)]
+
+			sum_x = np.zeros(mu)
+			for t in range(j):
+				sum_x += np.dot(G[mu*j:mu*(j+1), mu*t:mu*(t+1)], delta_a[mu*t:mu*(t+1)])
+			
+			rj = -Y_x[mu*j:mu*(j+1)] + (1/l)*sum_x + alpha[idx[mu*j:mu*(j+1)]]-b[idx[mu*j:mu*(j+1)]]
+			delta_a[mu*j:mu*(j+1)] = -np.linalg.solve(Mj, rj)
+
+
+
+		for i in range(S*mu):
+			alpha[idx[i]] = alpha[idx[i]] + delta_a[i]
+
+
+		d_x = YT.map(lambda Y_row: np.dot(Y_row, delta_a))
+		x = x.zip(d_x).map(lambda t: t[0]-(1/l)*t[1])
+
+		# Residue
+
+		if count % 5 == 0:
+			residual_start = time.time()
+
+			# A*x
+			ATalpha = A.map(lambda col: np.dot(alpha, col))
+
+			# AT*A*x
+			AATalpha = A.zip(ATalpha).map(lambda t: np.dot(t[0], t[1])).sum()
+
+			# r = AT*b - AT*A*x
+			r = (1/l)*AATalpha+alpha-b
+
+			norm_r = np.linalg.norm(r)
+			metrics['residual'] += time.time() - residual_start
+			if norm_r < eps:
+				break
+
+		count += 1
+
+	metrics['execution'] += time.time() - execution_start
+	metrics['iterations'] = count
+
+	return alpha, x, metrics
+
+
+
+
 
 
 
@@ -113,6 +200,7 @@ if __name__ == "__main__":
 	  .getOrCreate()
 
 	sc = spark.sparkContext
+	sc.setLogLevel("ERROR")
 
 	M = 5
 	N = 10
@@ -147,11 +235,11 @@ if __name__ == "__main__":
 	print("Iterations: ", metrics_BDCD['iterations'])
 	print("\n")
 
-	# x_CABCD, metrics_CABCD = CABCD(A_p, b_p, M, N, l, mu, S, eps)
-	# print("CABCD")
-	# print(x_CABCD)
-	# print("Resnorm: ", res_norm(A, b, x_CABCD, l))
-	# print("Execution Time: ", metrics_CABCD['execution'])
-	# print("Residual Time: ", metrics_CABCD['residual'])
-	# print("Iterations: ", metrics_CABCD['iterations'])
-	# print("\n")
+	y_CABDCD, x_CABDCD, metrics_CABDCD = CABDCD(sc, A_p, b, M, N, l, mu, S, eps)
+	print("CABDCD")
+	print(y_CABDCD)
+	print("Resnorm: ", res_norm(A, b, y_CABDCD, l))
+	print("Execution Time: ", metrics_CABDCD['execution'])
+	print("Residual Time: ", metrics_CABDCD['residual'])
+	print("Iterations: ", metrics_CABDCD['iterations'])
+	print("\n")
