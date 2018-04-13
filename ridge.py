@@ -9,9 +9,9 @@ import time
 
 def direct(A, b, M, N, l):
 	# (A T * A + l*I)^-1
-	ATA = np.linalg.inv(np.dot(A.T, A) + l*np.eye(N))
+	ATA = np.linalg.inv(np.dot(np.transpose(A), A) + l*np.eye(N))
 	# A * b
-	ATb = np.dot(A.T, b)
+	ATb = np.dot(np.transpose(A), b)
 	# x = (A T * A)^-1 * A*b
 	return np.dot(ATA, ATb)
 
@@ -194,7 +194,7 @@ def CABCD(A, b, M, N, l, mu, S, eps, max_iters=1000):
 
 
 def res_norm(A, b, x, l):
-	return np.linalg.norm(np.dot(A.T, np.dot(A, x)-b)+l*x)
+	return np.linalg.norm(np.dot(np.transpose(A), np.dot(A, x)-b)+l*x)
 
 
 
