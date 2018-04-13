@@ -1,6 +1,8 @@
-from pyspark.sql import SparkSession
+from pyspark import SparkContext, SparkConf
 from pyspark.mllib.random import RandomRDDs
+import argparse
 import numpy as np
+import sys
 import time
 
 
@@ -199,33 +201,38 @@ def res_norm(A, b, x, l):
 
 if __name__ == "__main__":
 
-	spark = SparkSession.builder \
-	  .master('local') \
-	  .appName("Linear Regression Model") \
-	  .config("spark.executor.memory", "1gb") \
-	  .getOrCreate()
 
-	sc = spark.sparkContext
-
-	sc.setLogLevel("ERROR")
-
-	M = 10
-	N = 4
+	ap = argparse.ArgumentParser()
+	ap.add_argument("-n", "--num-partitions", required=False, help="number of partitions")
+	ap.add_argument("-e", "--num-executors", required=False, default=1, help="number of executor instances")
+	ap.add_argument("-M", "--matrix-rows", required=False, default=10, help="number of rows in matrix")
+	ap.add_argument("-N", "--matrix-cols", required=False, default=10, help="number of cols in matrix")	
+	ap.add_argument("-u", "--block-size", required=False, default=1, help="block size")
+	ap.add_argument("-S", "--group-iterations", required=False, default=1, help="number of grouped iterations")
+	args = vars(ap.parse_args())
 
 
-	A_p = RandomRDDs.uniformVectorRDD(sc, M, N)
-	b_p = RandomRDDs.uniformRDD(sc, M)
+	numPartitions = int(args["num_partitions"])
+	numExecutors = int(args["num_executors"])
+	M = int(args["matrix_rows"])
+	N = int(args["matrix_cols"])
+	mu = int(args["block_size"])
+	S = int(args["group_iterations"])
+
+
+	conf = SparkConf().setAll([('spark.executor.cores', '1'), ('spark.executor.instances', str(numExecutors))])
+	sc = SparkContext(conf=conf)
+
+
+	A_p = RandomRDDs.uniformVectorRDD(sc, M, N, numPartitions=numPartitions, seed=1)
+	b_p = RandomRDDs.uniformRDD(sc, M, numPartitions=numPartitions, seed=2)
 
 	A = np.array(A_p.collect())
 	b = np.array(b_p.collect())
 
-
-	mu = 1
 	l = 0.5
 
-	S = 5
-
-	eps = 0.1
+	eps = 0.01
 
 	x_direct = direct(A, b, M, N, l)
 	print("Direct")
