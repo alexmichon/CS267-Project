@@ -9,12 +9,12 @@ import numpy as np
 def benchmark_blockSize(sc, A_p, b_p, M, N, l, eps, mus):
 	legends = []
 	for mu in mus:
-		x_BCD, metrics = BCD(sc, A_p, b_p, M, N, l, mu, eps, mu)
+		x_BCD, metrics = BCD(sc, A_p, b_p, M, N, l, mu, eps)
 		print(metrics)
 		residuals = metrics['residual']
 		total_iteration = len(residuals)*5
 		xs = np.arange(5,total_iteration+1, 5)
-		legends.append("line for block size of "+ str(mu))
+		legends.append("block size of "+ str(mu))
 		plt.plot(xs, residuals)
 	ax = plt.axes()   
 	plt.title("number of iteration versus residuals for different block size")     
@@ -24,7 +24,7 @@ def benchmark_blockSize(sc, A_p, b_p, M, N, l, eps, mus):
 	plt.xlabel('Iterations')
 	plt.ylabel('Residuals')
 	plt.ioff()
-	plt.savefig('iteration_residuals.png')
+	plt.savefig('bcd_iteration_residuals_blocksize.png')
 
 
 
@@ -36,11 +36,8 @@ if __name__ == "__main__":
 	numExecutors = 1
 	numPartitions = 1
 	conf = SparkConf().setAll([('spark.executor.cores', '1'), ('spark.executor.instances', str(numExecutors))])
-	print("??")
 	sc = SparkContext('local', conf=conf)
-	print("hello world")
 	sc.setCheckpointDir(os.getcwd())
-	print(os.getcwd())
 	output_file = open("benchmark_mu.csv", "w")
 	output_file.write("mu,execution,sequential,remote,iterations\n")
 	output_file.close()
