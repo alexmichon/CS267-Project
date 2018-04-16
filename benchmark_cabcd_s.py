@@ -21,6 +21,8 @@ def benchmark_S(sc, A, b, M, N, l, mu, eps, Ss):
 		total_iteration = len(residuals)*5
 		xs = np.arange(5,total_iteration+1, 5)
 		legends.append("CABCD s = "+str(s))
+		total_iteration = len(residuals)*5*s
+		xs = np.arange(5*s,total_iteration+1, 5*s)
 		plt.plot(xs, residuals)
 	ax = plt.axes()   
 	plt.title("number of iteration versus residuals for different unrolling steps")     
