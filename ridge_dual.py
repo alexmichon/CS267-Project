@@ -21,7 +21,7 @@ def BDCD(sc, A, b, M, N, l, mu, eps, max_iters=50):
 
 	A = A.cache()
 
-	x = sc.parallelize(np.zeros(N)).cache()
+	x = sc.parallelize(np.zeros(N), numSlices=A.getNumPartitions()).cache()
 	alpha = np.zeros(M)
 
 	metrics = {}
@@ -135,7 +135,7 @@ def CABDCD(sc, A, b, M, N, l, mu, S, eps, max_iters=1000):
 	A = A.cache()
 	
 
-	x = sc.parallelize(np.zeros(N)).cache()
+	x = sc.parallelize(np.zeros(N), numSlices=A.getNumPartitions()).cache()
 	alpha = np.zeros(M)
 
 	metrics = {}
@@ -293,8 +293,8 @@ if __name__ == "__main__":
 	sc.setCheckpointDir(os.getcwd())
 
 
-	A_p = RandomRDDs.uniformVectorRDD(sc, N, M, seed=1)
-	b_p = RandomRDDs.uniformRDD(sc, M, seed=2)
+	A_p = RandomRDDs.uniformVectorRDD(sc, N, M, seed=1, numPartitions=numPartitions)
+	b_p = RandomRDDs.uniformRDD(sc, M, seed=2, numPartitions=numPartitions)
 
 	A = np.array(A_p.collect()).T
 	b = np.array(b_p.collect())
