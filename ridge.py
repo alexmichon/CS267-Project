@@ -288,6 +288,7 @@ if __name__ == "__main__":
 	N = int(args["matrix_cols"])
 	mu = int(args["block_size"])
 	S = int(args["group_iterations"])
+	eps = float(args["precision"])
 
 
 	conf = SparkConf().setAll([('spark.executor.cores', '1'), ('spark.executor.instances', str(numExecutors))])
@@ -302,8 +303,6 @@ if __name__ == "__main__":
 	b = np.array(b_p.collect())
 
 	l = 0.5
-
-	eps = 0.01
 
 	x_direct = direct(A, b, M, N, l)
 	print("Direct")
