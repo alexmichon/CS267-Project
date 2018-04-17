@@ -27,7 +27,7 @@ def BCD(sc, A, b, M, N, l, mu, eps, max_iters=500):
 	z = b.map(lambda e: -e).cache()
 
 	metrics = {}
-
+	metrics['residual'] = []
 	time_execution = 0
 	time_sequential = 0
 	time_remote = 0
@@ -114,6 +114,7 @@ def BCD(sc, A, b, M, N, l, mu, eps, max_iters=500):
 			r = ATb-ATAx-l*x
 
 			norm_r = np.linalg.norm(r)
+			metrics['residual'].append(norm_r)
 			if norm_r < eps:
 				break	
 
@@ -144,6 +145,7 @@ def CABCD(sc, A, b, M, N, l, mu, S, eps, max_iters=500):
 	alpha = b.map(lambda e: -e).cache()
 
 	metrics = {}
+	metrics['residual'] = []
 
 	time_execution = 0
 	time_sequential = 0
@@ -236,6 +238,8 @@ def CABCD(sc, A, b, M, N, l, mu, S, eps, max_iters=500):
 			r = ATb-ATAx-l*x
 
 			norm_r = np.linalg.norm(r)
+
+			metrics['residual'].append(norm_r)
 			if norm_r < eps:
 				break
 
