@@ -16,22 +16,22 @@ def benchmark_nodes(sc, M, N, l, mu, s, eps):
 		A = RandomRDDs.uniformVectorRDD(sc, M, N, numPartitions=int(node_num), seed=1)
 		b = RandomRDDs.uniformRDD(sc, M, numPartitions=int(node_num), seed=2)
 		x_CABCD, metrics = CABCD(sc, A, b, M, N, l, mu, s, eps)
-		print("time", metrics['execution'])
+		print(metrics)
 		execution_times.append(metrics['execution'])
 
-	for node_num in nodes_num:
+	# for node_num in nodes_num:
 
-		print(node_num)
-		A = RandomRDDs.uniformVectorRDD(sc, M, N, numPartitions=int(node_num), seed=1)
-		b = RandomRDDs.uniformRDD(sc, M, numPartitions=int(node_num), seed=2)
-		x_CABCD, metrics = BCD(sc, A, b, M, N, l, mu, eps)
-		print("time", metrics['execution'])
-		execution_times.append(metrics['execution'])
+	# 	print(node_num)
+	# 	A = RandomRDDs.uniformVectorRDD(sc, M, N, numPartitions=int(node_num), seed=1)
+	# 	b = RandomRDDs.uniformRDD(sc, M, numPartitions=int(node_num), seed=2)
+	# 	x_CABCD, metrics = BCD(sc, A, b, M, N, l, mu, eps)
+	# 	print("time", metrics['execution'])
+	# 	execution_times.append(metrics['execution'])
 	
 	#ax = plt.axes()   
 	plt.plot(nodes_num, execution_times)
 	plt.title("number of nodes versus execution time")     
-	ax.legend(["CABCD with s = 10","BCD"])
+	#ax.legend(["CABCD with s = 10","BCD"])
 	plt.yscale('log')
 	#plt.xscale('log')
 	plt.xlabel('node number')
