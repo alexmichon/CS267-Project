@@ -25,6 +25,7 @@ def BDCD(sc, A, b, M, N, l, mu, eps, max_iters=50):
 	alpha = np.zeros(M)
 
 	metrics = {}
+	metrics['residual'] = []
 
 	time_execution = 0
 	time_sequential = 0
@@ -109,6 +110,7 @@ def BDCD(sc, A, b, M, N, l, mu, eps, max_iters=50):
 			r = (1/l)*AATalpha+alpha-b
 
 			norm_r = np.linalg.norm(r)
+			metrics['residual'].append(norm_r)
 			if norm_r < eps:
 				break
 
@@ -139,6 +141,7 @@ def CABDCD(sc, A, b, M, N, l, mu, S, eps, max_iters=1000):
 	alpha = np.zeros(M)
 
 	metrics = {}
+	metrics['residual'] = []
 
 	time_execution = 0
 	time_sequential = 0
@@ -225,7 +228,8 @@ def CABDCD(sc, A, b, M, N, l, mu, S, eps, max_iters=1000):
 
 		# Residue
 
-		if count % 5 == 0:
+		#if count % 5 == 0:
+		if count/S % 5 == 0:
 			residual_start = time.time()
 
 			# A*x
@@ -238,6 +242,7 @@ def CABDCD(sc, A, b, M, N, l, mu, S, eps, max_iters=1000):
 			r = (1/l)*AATalpha+alpha-b
 
 			norm_r = np.linalg.norm(r)
+			metrics['residual'].append(norm_r)
 			if norm_r < eps:
 				break
 

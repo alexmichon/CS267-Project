@@ -13,8 +13,7 @@ def benchmark_blockSize(sc, A_p, b_p, M, N, l, eps, mus, use_dual, num_partition
 	for mu in mus:
 		if use_dual:
 			b = np.array(b_p.collect())
-			A_p = RandomRDDs.uniformVectorRDD(sc, N, M, seed=1)
-			x_BCD, metrics = BDCD(sc, A_p, b, M, N, l, mu, eps)
+			y_BDCD, x_BDCD, metrics = BDCD(sc, A_p, b, M, N, l, mu, eps)
 		else:
 			x_BCD, metrics = BCD(sc, A_p, b_p, M, N, l, mu, eps)
 		print(metrics)
@@ -24,15 +23,16 @@ def benchmark_blockSize(sc, A_p, b_p, M, N, l, eps, mus, use_dual, num_partition
 		legends.append("block size of "+ str(mu))
 		plt.plot(xs, residuals)
 	ax = plt.axes()   
-	plt.title("number of iteration versus residuals for different block size")     
+	alg = "BCD" if not use_dual else "BDCD"
+	plt.title("number of iteration versus residuals for different block size for "+alg)     
 	ax.legend(legends)
 	plt.yscale('log')
 	plt.xscale('log')
 	plt.xlabel('Iterations')
 	plt.ylabel('Residuals')
 	plt.ioff()
-	alg = "BCD" if not use_dual else "BDCD"
-	plt.savefig(alg+'iteration_residuals_blocksize.png')
+	
+	plt.savefig(alg+'_iteration_residuals_blocksize.png')
 
 
 
@@ -56,9 +56,12 @@ if __name__ == "__main__":
 	output_file = open("benchmark_mu.csv", "w")
 	output_file.write("mu,execution,sequential,remote,iterations\n")
 	output_file.close()
-	M = 50
-	N = 700
-	A_p = RandomRDDs.uniformVectorRDD(sc, M, N, numPartitions=num_partitions, seed=1)
+	M = 700
+	N = 200
+	if use_dual:
+		A_p = RandomRDDs.uniformVectorRDD(sc, N, M, numPartitions=num_partitions, seed=1)
+	else:
+		A_p = RandomRDDs.uniformVectorRDD(sc, M, N, numPartitions=num_partitions, seed=1)
 	b_p = RandomRDDs.uniformRDD(sc, M, numPartitions=num_partitions, seed=2)
 	l = 0.5
 	eps = 0.1
