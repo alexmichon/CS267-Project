@@ -296,6 +296,7 @@ if __name__ == "__main__":
 	conf = SparkConf().setAll([('spark.executor.cores', '1'), ('spark.executor.instances', str(numExecutors))])
 	sc = SparkContext(conf=conf)
 	sc.setCheckpointDir(os.getcwd())
+	sc.setLogLevel("ERROR")
 
 
 	A_p = RandomRDDs.uniformVectorRDD(sc, N, M, seed=1, numPartitions=numPartitions)

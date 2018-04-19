@@ -20,7 +20,7 @@ def benchmark_S(sc, A, b, M, N, l, mu, eps, Ss, use_dual, num_partitions):
 	residuals = metrics['residual']
 	total_iteration = len(residuals)*5
 	xs = np.arange(5,total_iteration+1, 5)
-	alg = "CABCD" if not use_dual else "CABDCD"
+	alg = "BCD" if not use_dual else "BDCD"
 	legends.append(alg)
 	plt.plot(xs, residuals)
 	for s in Ss:

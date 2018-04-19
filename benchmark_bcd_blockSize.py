@@ -51,13 +51,13 @@ if __name__ == "__main__":
 	num_executors = 1
 	num_partitions = 1
 	conf = SparkConf().setAll([('spark.executor.cores', '1'), ('spark.executor.instances', str(num_executors))])
-	sc = SparkContext('local', conf=conf)
+	sc = SparkContext(conf=conf)
 	sc.setCheckpointDir(os.getcwd())
 	output_file = open("benchmark_mu.csv", "w")
 	output_file.write("mu,execution,sequential,remote,iterations\n")
 	output_file.close()
-	M = 700
-	N = 200
+	M = 200
+	N = 700
 	if use_dual:
 		A_p = RandomRDDs.uniformVectorRDD(sc, N, M, numPartitions=num_partitions, seed=1)
 	else:
