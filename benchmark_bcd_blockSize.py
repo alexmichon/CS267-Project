@@ -53,9 +53,6 @@ if __name__ == "__main__":
 	conf = SparkConf().setAll([('spark.executor.cores', '1'), ('spark.executor.instances', str(num_executors))])
 	sc = SparkContext(conf=conf)
 	sc.setCheckpointDir(os.getcwd())
-	output_file = open("benchmark_mu.csv", "w")
-	output_file.write("mu,execution,sequential,remote,iterations\n")
-	output_file.close()
 	M = 200
 	N = 700
 	if use_dual:

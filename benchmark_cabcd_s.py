@@ -14,7 +14,7 @@ def benchmark_S(sc, A, b, M, N, l, mu, eps, Ss, use_dual, num_partitions):
 	legends = []
 	if use_dual:
 		b = np.array(b_p.collect())
-		y_BDCD, x_BDCD, metrics = BDCD(sc, A_p, b, M, N, l, mu, eps)
+		y_BDCD, x_BDCD, metrics = BDCD(sc, A, b, M, N, l, mu, eps)
 	else:
 		x_BDCD, metrics = BCD(sc, A, b, M, N, l, mu, eps)
 	residuals = metrics['residual']
@@ -26,7 +26,7 @@ def benchmark_S(sc, A, b, M, N, l, mu, eps, Ss, use_dual, num_partitions):
 	for s in Ss:
 		if use_dual:
 			b = np.array(b_p.collect())
-			y_BDCD, x_BDCD, metrics = CABDCD(sc, A_p, b, M, N, l, mu, s, eps)
+			y_BDCD, x_BDCD, metrics = CABDCD(sc, A, b, M, N, l, mu, s, eps)
 		else:
 			x_CABCD, metrics = CABCD(sc, A, b, M, N, l, mu, s, eps)
 		print(metrics)
@@ -65,9 +65,6 @@ if __name__ == "__main__":
 	conf = SparkConf().setAll([('spark.executor.cores', '1'), ('spark.executor.instances', str(num_executors))])
 	sc = SparkContext('local', conf=conf)
 	sc.setCheckpointDir(os.getcwd())
-	output_file = open("benchmark_mu.csv", "w")
-	output_file.write("mu,execution,sequential,remote,iterations\n")
-	output_file.close()
 	M = 200
 	N = 700
 	if use_dual:
