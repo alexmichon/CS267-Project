@@ -78,7 +78,7 @@ def BDCD(sc, A, b, M, N, l, eps, type=0, max_iters=50):
 		iteration_remote_start = time.time()
 
 		dx = Ah.map(lambda col: theta*b[idx]*col)
-		x = x.zip(dx).map(lambda t: t[0] + t[1])
+		x = x.zip(dx).map(lambda t: t[0] + t[1]).cache()
 
 		# Break lineage
 		if count % 50:
